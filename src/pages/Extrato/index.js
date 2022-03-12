@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import styled from 'styled-components'
+import { useSelector } from 'react-redux'
+import axios from 'axios'
 
 
 const Content = styled.div`
-  max-width: 500px;
-  height: 60vh;
+  max-width: 800px;
   margin: 5% auto;
   background: white;
   border-radius:10px;
@@ -25,6 +26,7 @@ const Linha = styled.ul`
   margin: 4px auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   color: black;
   padding: 8px;
 `
@@ -34,40 +36,35 @@ const Item = styled.li`
 `
 
 
+
 export default function Extrato() {
+  const [extrato, setExtrato] = useState([])
+  const user = useSelector(state => state.login)
+useEffect(async() => {
+    const response = await axios.get(`http://localhost:4002/movimentacoes/${user.id_cliente}`)
+    setExtrato(response.data)
+}, [])
+
   return (
 <>
     <Header/>
     <Content>
       <Titulo>Extrato</Titulo>
-    <Linha>
-        <Item>Data</Item>
-        <Item>Valor</Item>
-        <Item>Tipo</Item>
-      </Linha> 
-      <Linha>
-        <Item>06/05</Item>
-        <Item>R$2.500,00</Item>
-        <Item>Depósito</Item>
-      </Linha> 
-      <Linha>
-        <Item>07/06</Item>
-        <Item>R$700,00</Item>
-        <Item>Pagamento</Item>
-      </Linha>
-      <Linha>
-        <Item>07/06</Item>
-        <Item>R$1.500,00</Item>
-        <Item>Depósito</Item>
-      </Linha>
-      <Linha>
-        <Item>08/06</Item>
-        <Item>R$1.700,00</Item>
-        <Item>Depósito</Item>
-      </Linha>   
+
+    {extrato.map(transacao =>{
+      return(
+        <Linha>
+          <Item>{transacao.data}</Item>
+          <Item>RS {parseFloat(transacao.valor).toFixed(2)}</Item>
+          <Item>{transacao.tipo}</Item>
+        </Linha> 
+      )
+    })}
+    
+   
       <Linha>
         <Item><b>Saldo atual</b></Item>
-        <Item><b>R$ 5.000,00</b></Item>
+        <Item><b>{parseFloat(user.saldo).toFixed(2).replace(".", ",")}</b></Item>
       </Linha>
     </Content>
 

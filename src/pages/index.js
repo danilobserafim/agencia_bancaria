@@ -1,9 +1,9 @@
-import { useState, useSelector } from 'react'
-import { useDispatch } from 'react-redux'
-import { login } from "../store/actions/loginAction"
 import Router from 'next/router'
-
+import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import styled from "styled-components"
+import { login } from "../store/actions/loginAction"
+
 
 
 
@@ -57,12 +57,9 @@ const Forgot = styled.a`
 
 
 export default function Home() {
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
-  const dispatch = useDispatch()
-
-
-
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const dispatch = useDispatch();
   return (
     <>
       <Form onSubmit={submit}>
@@ -85,7 +82,7 @@ export default function Home() {
   async function submit(e) {
     e.preventDefault()
     const credentials = {email: email, senha: senha};
-    const response = await fetch('http://localhost:4000/clientes/login', 
+    const response = await fetch('http://localhost:4002/clientes/login', 
     {method: "POST", 
     mode:'cors',
     credentials: 'same-origin',
@@ -96,13 +93,12 @@ export default function Home() {
     body:JSON.stringify(credentials)
     })
     const data = await response.json();
-    if (!response.status) {
-      alert("Algo deu errado") 
-
-    }
-    else{
+    if (response.status === 200) {
       dispatch(login(data))
       Router.replace('/Inicio') 
+    }
+    else{
+      alert("Algo deu errado") 
     }
   }
 }

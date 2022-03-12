@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Header from '../components/Header'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
+import {login} from '../../store/actions/loginAction'
 
 
 const Form = styled.form`
@@ -43,18 +45,48 @@ cursor: pointer;
 }
 `
 export default function Pagar() {
+  const user = useSelector(state => state.login)
+  const dispatch = useDispatch()
+  const [conta, setConta] = useState(0)
+  const [valor, setValor] = useState(0)
   return (
 <>
     <Header/>
-    <Form>
+    <Form onSubmit={submit}>
       <Titulo>Pagar conta</Titulo>
-      <Label for='boleto'>Boleto</Label>
-      <Input type='text' placeholder='Número do boleto' id='boleto'/>
-      <Label for='valor'>Valor</Label>
+      <Label htmlFor='boleto'>Boleto</Label>
+      <Input type='number' placeholder='Número do boleto' id='boleto' value={conta} onChange={()=>setConta(event.target.value)}/>
+      <Label htmlFor='valor'>Valor</Label>
 
-      <Input type='number' placeholder='Valor do boleto' id='valor'/>
+      <Input type='number' placeholder='Valor do boleto' id='valor' value={valor} onChange={()=>setValor(event.target.value)}/>
       <Button>PAGAR</Button>
 
     </Form> 
 </> )
+async function submit(e) {
+  e.preventDefault()
+  const credentials = {
+    id_remetente:	user.id_cliente,
+    id_destinatario:	conta,
+    valor:	valor,
+    tipo:	"Pagamento"
+  }
+  const response = await fetch('http://localhost:4002/movimentacoes/', 
+  {method: "POST", 
+  mode:'cors',
+  credentials: 'same-origin',
+  headers:{
+    'Content-Type': 'application/json;charset=utf-8',
+    'Access-Control-Allow-Origin':	'*'
+  }, 
+  body:JSON.stringify(credentials)
+  })
+  if (response.status === 200) {
+    setConta(0)
+    setValor(0)
+    user.saldo = user.saldo - valor
+    dispatch(login(user))
+  }
+
+}
 }
